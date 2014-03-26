@@ -22,7 +22,9 @@ SOURCES += main.cpp \
     mgrow.cpp
 
 HEADERS += \
-    mgrow.h
+    mgrow.h \
+    tcpcommands.h \
+    mprotocol.h
 
 LIBS += -L$$PWD/../../libGSocket/bin/ -lGSocket
 

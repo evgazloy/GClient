@@ -10,6 +10,7 @@
 #include <QTimerEvent>
 #include "mgsocket.h"
 #include "mprotocol.h"
+#include "tcpcommands.h"
 
 #define PORT_TIMEOUT 1000
 #define SOCKET_TIMEOUT 2000

@@ -171,6 +171,9 @@ void MGrow::socketReady()
     qDebug()<<"Socket ready";
     m_socketState = QAbstractSocket::ConnectedState;
     this->killTimer(m_socketTimerId);
+    Q_CHECK_PTR(m_socket);
+
+    m_socket->send("adsfasd");
 }
 
 void MGrow::socketError(QAbstractSocket::SocketError err)
