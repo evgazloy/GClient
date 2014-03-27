@@ -13,7 +13,6 @@
 #include "tcpcommands.h"
 
 #define PORT_TIMEOUT 1000
-#define SOCKET_TIMEOUT 2000
 
 class MGrow : public QObject
 {
@@ -61,8 +60,6 @@ public:
 
 private:
     MGSocket *m_socket = 0;
-    int m_socketTimerId = 0;
-    int m_socketState = QAbstractSocket::UnconnectedState;
     QString m_host;
     quint16 m_serverPort;
 

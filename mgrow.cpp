@@ -146,15 +146,6 @@ void MGrow::timerEvent(QTimerEvent *ev)
         else
             this->killTimer(m_portTimerId);
     }
-    if(ev->timerId() == m_socketTimerId)
-    {
-        Q_CHECK_PTR(m_socket);
-        if(m_socketState == QAbstractSocket::UnconnectedState)
-        {
-            m_socketState = QAbstractSocket::ConnectingState;
-            this->createConnection();
-        }
-    }
 }
 
 void MGrow::initSocket()
@@ -169,8 +160,6 @@ void MGrow::initSocket()
 void MGrow::socketReady()
 {
     qDebug()<<"Socket ready";
-    m_socketState = QAbstractSocket::ConnectedState;
-    this->killTimer(m_socketTimerId);
     Q_CHECK_PTR(m_socket);
 
     m_socket->send("adsfasd");
@@ -178,8 +167,7 @@ void MGrow::socketReady()
 
 void MGrow::socketError(QAbstractSocket::SocketError err)
 {
-    m_socketState = QAbstractSocket::UnconnectedState;
-    m_socketTimerId = this->startTimer(SOCKET_TIMEOUT);
+
 }
 
 void MGrow::setCertificate(const QString &file)
