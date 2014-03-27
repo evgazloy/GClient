@@ -68,9 +68,19 @@ void MGrow::inData()
         switch(cmd)
         {
         case USB_TEMP_R:
+        {
             size = sizeof(float);
             ptr = &m_temp;
+
+            if(!this->readCmd(ptr, size))
+                return;
+
+            cmdTemp_s data;
+            data.set = 1;
+            data.temp = m_temp;
+            this->send<cmdTemp_s>(data);
             break;
+        }
 
         case USB_TIME_R:
             size = sizeof(MTime);
@@ -99,11 +109,6 @@ void MGrow::inData()
 
         default:
             m_buffer.remove(0,1);
-        }
-        if(size)
-        {
-            if(!this->readCmd(ptr, size))
-                return;
         }
     }
 }
@@ -154,7 +159,54 @@ void MGrow::initSocket()
     Q_CHECK_PTR(m_socket);
     connect(m_socket, SIGNAL(sig_ready()), SLOT(socketReady()), Qt::DirectConnection);
     connect(m_socket, SIGNAL(sig_socketError(QAbstractSocket::SocketError)), SLOT(socketError(QAbstractSocket::SocketError)));
+    connect(m_socket, &MGSocket::sig_inCmd, this, &MGrow::inCmd);
     m_socket->initSocket();
+}
+
+void MGrow::inCmd(QByteArray data)
+{
+    QDataStream in(data);
+    quint8 cmd;
+    in>>cmd;
+
+    switch(cmd)
+    {
+    case cmdRegistration:
+    {
+        cmdRegistration_s data;
+        in>>data;
+        if(in.status()!=QDataStream::Ok)
+            qWarning()<<"Error reading registration stream";
+        else
+            this->inRegistration(data);
+        break;
+    }
+    case cmdTemp:
+    {
+        cmdTemp_s data;
+        in>>data;
+        if(in.status()!=QDataStream::Ok)
+            qWarning()<<"Error reading getTemp stream";
+        else
+            this->inGetTemp(data);
+        break;
+    }
+
+    default:
+        qCritical()<<"Unknown command";
+        break;
+    }
+}
+
+void MGrow::inRegistration(const cmdRegistration_s &data)
+{
+    qDebug()<<"Control registered";
+}
+
+void MGrow::inGetTemp(const cmdTemp_s &data)
+{
+    if(!data.set)
+        this->sendQuery(USB_TEMP_R);
 }
 
 void MGrow::socketReady()
@@ -188,3 +240,11 @@ void MGrow::createConnection()
     m_socket->createConnection(m_host, m_serverPort);
 }
 
+template<class CMD> void MGrow::send(CMD cmd)
+{
+    QByteArray data;
+    QDataStream out(&data, QIODevice::WriteOnly);
+    out<<cmd;
+    Q_CHECK_PTR(m_socket);
+    m_socket->send(data);
+}

@@ -64,6 +64,11 @@ private:
     quint16 m_serverPort;
 
     void initSocket();
+    void inCmd(QByteArray data);
+    template <class CMD> void send(CMD cmd);
+
+    void inRegistration(const cmdRegistration_s &data);
+    void inGetTemp(const cmdTemp_s &data);
 
 signals:
 
